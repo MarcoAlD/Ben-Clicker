@@ -5,7 +5,9 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,7 +17,10 @@ public class ClickerGamePanel extends JPanel {
     // Instance variables
     private int clickCount = 0, level = 1, clickValue = 100, autoClickValue = 0;
     private JButton clickButton, upgradeButton, autoClickButton, upgradeAutoButton, addAutoClickerButton, openShopButton, closeShopButton;
-    private JLabel clickCountLabel, levelLabel, autoClickValueLabel, clickValueLabel;
+    private JLabel clickCountLabel, levelLabel, autoClickValueLabel, clickValueLabel, levelUpLabel;
+    private ImageIcon[] animationFrames;
+    private int currentFrame;
+    private Timer animationTimer;
     
     public ClickerGamePanel() {
         this.setLayout(new BorderLayout(100, 0));
@@ -25,19 +30,56 @@ public class ClickerGamePanel extends JPanel {
         this.add(shopPanel(), BorderLayout.EAST);
         this.add(displayValuesPanel(), BorderLayout.WEST);
 
-        startAutoClicker();
+        // startAutoClicker();
+        initializeAnimation();
+    }
+
+    private void initializeAnimation() {
+        
+        animationFrames = new ImageIcon[]{
+            new ImageIcon("neb.png"),
+            // new ImageIcon("ben.png"),
+            new ImageIcon("nen.png"),
+            new ImageIcon("beb.png")
+        };
+        currentFrame = 0;
+
+        
+        animationTimer = new Timer(10, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                currentFrame = (currentFrame + 1) % animationFrames.length;
+                clickButton.setIcon(animationFrames[currentFrame]);
+            }
+        });
     }
 
     public final JPanel clickerPanel() {
         JPanel clickerPanel = new JPanel();
         clickerPanel.setLayout(new GridLayout(2, 1));
         clickerPanel.setPreferredSize(new Dimension(400, 400));
+
         
-        // ImageIcon icon = new ImageIcon("ben.png");
-        clickButton = new JButton("Click Me");
-        // clickButton.setBorder(BorderFactory.createEmptyBorder());
-        // clickButton.setContentAreaFilled(false);
+        ImageIcon icon = new ImageIcon("ben.png");
+        clickButton = new JButton(icon);
+        clickButton.setBorder(BorderFactory.createEmptyBorder());
+        clickButton.setContentAreaFilled(false);
         clickButton.addActionListener(new ClickerListener());
+        clickButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                animationTimer.start();
+                Timer stopTimer = new Timer(400, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        animationTimer.stop();
+                        clickButton.setIcon(new ImageIcon("ben.png"));
+                    }
+                });
+                stopTimer.setRepeats(false);
+                stopTimer.start();
+            }
+        });
         clickerPanel.add(clickButton);
 
         autoClickButton = new JButton("Auto Clicker: Off");
@@ -71,6 +113,9 @@ public class ClickerGamePanel extends JPanel {
         clickValueLabel = new JLabel("Click Value: " + clickValue);
         displayValuesPanel.add(clickValueLabel);
 
+        levelUpLabel = new JLabel("Level Up: " + Math.pow(3, level) * 100);
+        displayValuesPanel.add(levelUpLabel);
+
         return displayValuesPanel;
     }
 
@@ -90,6 +135,7 @@ public class ClickerGamePanel extends JPanel {
                 openShopButton.setVisible(false);
             }
         });
+        
         upgradePanel.add(openShopButton);
 
         closeShopButton = new JButton("Close Shop");
@@ -127,6 +173,9 @@ public class ClickerGamePanel extends JPanel {
     public void levelUp() {
         level++;
         levelLabel.setText("Level: " + level);
+    
+        int clicksForNextLevel = (int) (Math.pow(3, level) * 100);
+        levelUpLabel.setText("Level Up: " + clicksForNextLevel);
     }
 
     public final void startAutoClicker() {
@@ -136,24 +185,36 @@ public class ClickerGamePanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 clickCount += autoClickValue;
                 clickCountLabel.setText("Clicks: " + clickCount);
+                
+                animationTimer.start();
+                Timer stopTimer = new Timer(400, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        animationTimer.stop();
+                        clickButton.setIcon(new ImageIcon("ben.png"));
+                    }
+                });
+                stopTimer.setRepeats(false);
+                stopTimer.start();
             }
         });
         timer.start();
     }
 
     private class ClickerListener implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             clickCount += clickValue;
             clickCountLabel.setText("Clicks: " + clickCount);
-
-            if (clickCount >= level * 1500) {
+    
+            int clicksForNextLevel = (int) (Math.pow(3, level) * 100);
+            int remainingClicks = clicksForNextLevel - clickCount;
+            levelUpLabel.setText("Level Up: " + remainingClicks);
+    
+            if (clickCount >= clicksForNextLevel) {
                 levelUp();
             }
         }
-        
-        
     }
 
     private class UpgradeListener implements ActionListener {
@@ -185,20 +246,34 @@ public class ClickerGamePanel extends JPanel {
     }
 
     private class AutoClickerListener implements ActionListener {
-
         @Override
         public void actionPerformed(ActionEvent e) {
             if (autoClickButton.getText().equals("Auto Clicker: Off")) {
                 autoClickValue += 1;
                 autoClickButton.setText("Auto Clicker: On");
                 autoClickValueLabel.setText("Auto Click Value: " + autoClickValue);
+    
+                Timer autoClickTimer = new Timer(1000, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        clickCount += autoClickValue;
+                        clickCountLabel.setText("Clicks: " + clickCount);
+    
+                        int clicksForNextLevel = (int) (Math.pow(3, level) * 100);
+                        int remainingClicks = clicksForNextLevel - clickCount;
+                        levelUpLabel.setText("Level Up: " + remainingClicks);
+    
+                        if (clickCount >= clicksForNextLevel) {
+                            levelUp();
+                        }
+                    }
+                });
+                autoClickTimer.start();
             } else {
                 autoClickButton.setText("Auto Clicker: Off");
                 autoClickValue = 0;
             }
-
         }
-        
     }
 
     private class addAutoListener implements ActionListener {
@@ -208,7 +283,7 @@ public class ClickerGamePanel extends JPanel {
             if (clickCount >= 100) {
                 clickCount -= 100;
                 autoClickButton.setVisible(true);
-                addAutoClickerButton.setVisible(false);
+                addAutoClickerButton.setEnabled(false);
             }
         }
         
