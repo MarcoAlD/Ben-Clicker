@@ -15,13 +15,11 @@ import javax.swing.Timer;
 
 public class ClickerGamePanel extends JPanel {
     // Instance variables
-    private int clickCount = 0, level = 1, clickValue = 100, autoClickValue = 0;
+    private int clickCount = 0, level = 1, clickValue = 100, autoClickValue = 0, currentFrame;
     private JButton clickButton, upgradeButton, autoClickButton, upgradeAutoButton, addAutoClickerButton, openShopButton, closeShopButton;
     private JLabel clickCountLabel, levelLabel, autoClickValueLabel, clickValueLabel, levelUpLabel;
     private ImageIcon[] animationFrames;
-    private int currentFrame;
-    private Timer animationTimer;
-    private Timer autoClickTimer;
+    private Timer animationTimer, autoClickTimer;
     
     public ClickerGamePanel() {
         this.setLayout(new BorderLayout(100, 0));
@@ -98,6 +96,7 @@ public class ClickerGamePanel extends JPanel {
 
         autoClickButton = new JButton("Auto Clicker: Off");
         autoClickButton.addActionListener(new AutoClickerListener());
+        autoClickButton.addActionListener(new removeAutoListener());
         autoClickButton.setVisible(false);
         clickerPanel.add(autoClickButton);
 
@@ -174,6 +173,7 @@ public class ClickerGamePanel extends JPanel {
         upgradeAutoButton = new JButton("Upgrade Auto Click Value (20 clicks)");
         upgradeAutoButton.addActionListener(new UpgradeAutoListener());
         upgradeAutoButton.setVisible(false);
+        upgradeAutoButton.setEnabled(false);
         upgradePanel.add(upgradeAutoButton);
 
         addAutoClickerButton = new JButton("Add the auto clicker (100 clicks)");
@@ -242,7 +242,7 @@ public class ClickerGamePanel extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (clickCount >= 20) {
+            if (clickCount >= 20 && autoClickButton.getText().equals("Auto Clicker: On")) {
                 clickCount -= 20;
                 autoClickValue++;
                 autoClickValueLabel.setText("Auto Click Value: " + autoClickValue);
@@ -257,18 +257,22 @@ public class ClickerGamePanel extends JPanel {
         public void actionPerformed(ActionEvent e) {
             if (autoClickButton.getText().equals("Auto Clicker: Off")) {
                 autoClickValue += 1;
+                autoClickValueLabel.setText("Auto Click Value: " + autoClickValue);
                 autoClickButton.setText("Auto Clicker: On");
                 autoClickTimer.start();
                 animationTimer.stop();
                 animationTimer.start();
                 stopTimer();
+                if (clickCount >= 20) {
+                    upgradeAutoButton.setEnabled(true);
+                }
             } else {
                 autoClickButton.setText("Auto Clicker: Off");
-                autoClickValue = 0;
                 autoClickTimer.stop();
                 autoClickTimer.restart();
                 animationTimer.stop();
                 clickButton.setIcon(new ImageIcon("images/ben.png"));
+                
             }
         }
     }
@@ -285,4 +289,27 @@ public class ClickerGamePanel extends JPanel {
         }
         
     }
+
+    private class removeAutoListener implements ActionListener {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Timer removeAutoTimer = new Timer(5000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    autoClickValue = 0;
+                    autoClickButton.setText("Auto Clicker: Off");
+                    autoClickTimer.stop();
+                    autoClickTimer.restart();
+                    animationTimer.stop();
+                    clickButton.setIcon(new ImageIcon("images/ben.png"));
+                    addAutoClickerButton.setEnabled(true);
+                    autoClickButton.setVisible(false);
+                    upgradeAutoButton.setEnabled(false);
+                }
+            });
+            removeAutoTimer.setRepeats(false);
+            removeAutoTimer.start();
+    }
 }
+    }
