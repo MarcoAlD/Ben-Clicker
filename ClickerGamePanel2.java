@@ -1,29 +1,122 @@
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public final class ClickerGamePanel2 extends JPanel {
 
-    private int totalClicks = 0, clickValue = 12000, clickMultiplier = 1, autoValue = 0, upgradeClickCost = 150, level = 1, nextLevelValue = (int) Math.pow(3, level) * 100, upgradeMultiplierCost = 1500, ainaCost = 3000, coraCost = 12000;
-    private JButton clickButton, upgradeAutoButton, upgradeClickButton, upgradeMultiplierButton, ainaButton, coraButton, openShopButton, closeShopButton, addAinaButton, addCoraButton;
-    private JLabel upgradeLabel, autoLabel, clickLabel, levelLabel, nextLevelLabel, multiplierLabel;
+    private JPanel shopPanel, inventoryPanel;
+    private int totalClicks = 0, partyHatCost = 5000, clickValue = 1, clickMultiplier = 1, autoValue = 0, upgradeClickCost = 150, level = 1, nextLevelValue = (int) Math.pow(3, level) * 100, upgradeMultiplierCost = 1500, ainaCost = 3000, coraCost = 12000, autoClickerCost = 3000;
+    private JButton clickButton, openInventoryButton, upgradeAutoButton, upgradeClickButton, upgradeMultiplierButton, ainaButton, coraButton, openShopButton, closeShopButton, addAinaButton, addCoraButton, partyHatButton;
+    private JLabel autoLabel, clickLabel, levelLabel, nextLevelLabel, multiplierLabel, clickValueLabel;
     private boolean multiplierApplied = false, autoClickerRunning = false;
     private Timer autoClickerTimer;
+    private Map<String, Boolean> inventory;
 
     public ClickerGamePanel2() {
         this.setLayout(new BorderLayout(100, 0));
 
+        shopPanel = new JPanel();
+        inventoryPanel = new JPanel();
+        inventory = new HashMap<>();
+
         this.add(clickerPanel(), BorderLayout.CENTER);
-        this.add(statsPanel(), BorderLayout.WEST);
-        this.add(shopPanel(), BorderLayout.EAST);
+        this.add(inventoryPanel, BorderLayout.WEST);
+        this.add(shopPanel, BorderLayout.EAST);
+        this.add(statsPanel(), BorderLayout.SOUTH);
+
+        initializeShop();
+        initializeInventory();
+    }
+
+    public void initializeShop() {
+        shopPanel.setLayout(new BoxLayout(shopPanel, BoxLayout.Y_AXIS));
+        openShopButton = new JButton("Open Shop");
+        openShopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                shopPanel.removeAll();
+                shopPanel.add(closeShopButton);
+                shopPanel.add(upgradeClickButton);
+                shopPanel.add(upgradeMultiplierButton);
+                shopPanel.add(upgradeAutoButton);
+                shopPanel.add(addAinaButton);
+                // shopPanel.add(addCoraButton);
+                shopPanel.add(partyHatButton);
+                shopPanel.revalidate();
+                shopPanel.repaint();
+            }
+        });
+        shopPanel.add(openShopButton);
+
+        closeShopButton = new JButton("Close Shop");
+        closeShopButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                shopPanel.removeAll();
+                shopPanel.add(openShopButton);
+                shopPanel.add(openInventoryButton);
+                shopPanel.revalidate();
+                shopPanel.repaint();
+            }
+        });
+
+        openInventoryButton = new JButton("Open Inventory");
+        openInventoryButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                inventoryPanel.removeAll();
+                for (String item : inventory.keySet()) {
+                    JButton itemButton = new JButton(item + (inventory.get(item) ? " (Equipped)" : " (Unequipped)"));
+                    itemButton.addActionListener(new InventoryItemListener(item));
+                    inventoryPanel.add(itemButton);
+                }
+                inventoryPanel.revalidate();
+                inventoryPanel.repaint();
+            }
+        });
+
+        upgradeClickButton = new JButton("Upgrade Click Value (Cost: " + upgradeClickCost + ")");
+        upgradeClickButton.addActionListener(new UpgradeClickListener());
+
+        upgradeMultiplierButton = new JButton("Upgrade Click Multiplier (Cost: " + upgradeMultiplierCost + ")");
+        upgradeMultiplierButton.addActionListener(new MultiplierListener());
+
+        upgradeAutoButton = new JButton("Upgrade Auto Clicker (Cost: " + autoClickerCost + ")");
+        upgradeAutoButton.addActionListener(new UpgradeAutoListener());
+
+        addAinaButton = new JButton("Add Aina? (Cost: " + ainaCost + ")");
+        addAinaButton.addActionListener(new AutoAinaListener());
+
+        partyHatButton = new JButton("Buy Party Hat (Cost: " + partyHatCost + ")");
+        partyHatButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (totalClicks >= partyHatCost) {
+                    totalClicks -= partyHatCost;
+                    inventory.put("Party Hat", false);
+                    partyHatButton.setEnabled(false);
+                }
+            }
+        });
+
+        shopPanel.add(openShopButton);
+        shopPanel.add(openInventoryButton);
+    }
+
+    public void initializeInventory() {
+        inventoryPanel.setLayout(new GridLayout(0, 1));
     }
 
     public JPanel clickerPanel() {
@@ -80,8 +173,8 @@ public final class ClickerGamePanel2 extends JPanel {
         nextLevelLabel = new JLabel("Next Level: " + nextLevel);
         statsPanel.add(nextLevelLabel);
 
-        upgradeLabel = new JLabel("Click Value: " + clickValue);
-        statsPanel.add(upgradeLabel);
+        clickValueLabel = new JLabel("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+        statsPanel.add(clickValueLabel);
 
         multiplierLabel = new JLabel("Click Multiplier: " + clickMultiplier);
         statsPanel.add(multiplierLabel);
@@ -92,55 +185,65 @@ public final class ClickerGamePanel2 extends JPanel {
         return statsPanel;
     }
 
-    @SuppressWarnings("Convert2Lambda")
-    public JPanel shopPanel() {
-        JPanel shopPanel = new JPanel();
-        shopPanel.setLayout(new BoxLayout(shopPanel, BoxLayout.Y_AXIS));
+    // @SuppressWarnings("Convert2Lambda")
+    // public JPanel shopPanel() {
+    //     JPanel shopPanel = new JPanel();
+    //     shopPanel.setLayout(new BoxLayout(shopPanel, BoxLayout.Y_AXIS));
 
-        openShopButton = new JButton("Open Shop");
-        openShopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                shopPanel.removeAll();
-                shopPanel.add(closeShopButton);
-                shopPanel.add(upgradeClickButton);
-                shopPanel.add(upgradeMultiplierButton);
-                shopPanel.add(upgradeAutoButton);
-                shopPanel.add(addAinaButton);
-                shopPanel.add(addCoraButton);
-                shopPanel.revalidate();
-                shopPanel.repaint();
-            }
-        });
-        shopPanel.add(openShopButton);
+    //     openShopButton = new JButton("Open Shop");
+    //     openShopButton.addActionListener(new ActionListener() {
+    //         @Override
+    //         public void actionPerformed(ActionEvent e) {
+    //             shopPanel.removeAll();
+    //             shopPanel.add(closeShopButton);
+    //             shopPanel.add(upgradeClickButton);
+    //             shopPanel.add(upgradeMultiplierButton);
+    //             shopPanel.add(upgradeAutoButton);
+    //             shopPanel.add(addAinaButton);
+    //             shopPanel.add(addCoraButton);
+    //             shopPanel.add(partyHatButton);
+    //             shopPanel.revalidate();
+    //             shopPanel.repaint();
+    //         }
+    //     });
+    //     shopPanel.add(openShopButton);
 
-        closeShopButton = new JButton("Close Shop");
-        closeShopButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                shopPanel.removeAll();
-                shopPanel.add(openShopButton);
-                shopPanel.revalidate();
-                shopPanel.repaint();
-            }
-        });
+    //     closeShopButton = new JButton("Close Shop");
+    //     closeShopButton.addActionListener(new ActionListener() {
+    //         @Override
+    //         public void actionPerformed(ActionEvent e) {
+    //             shopPanel.removeAll();
+    //             shopPanel.add(openShopButton);
+    //             shopPanel.add(openInventoryButton);
+    //             shopPanel.revalidate();
+    //             shopPanel.repaint();
+    //         }
+    //     });
 
-        upgradeClickButton = new JButton("Upgrade Click Value (Cost: " + upgradeClickCost + ")");
-        upgradeClickButton.addActionListener(new UpgradeClickListener());
+    //     openInventoryButton = new JButton("Open Inventory");
 
-        upgradeMultiplierButton = new JButton("Upgrade Click Multiplier (Cost: " + upgradeMultiplierCost + ")");
-        upgradeMultiplierButton.addActionListener(new MultiplierListener());
 
-        upgradeAutoButton = new JButton("Upgrade Auto Clicker: " + autoValue);
+    //     upgradeClickButton = new JButton("Upgrade Click Value (Cost: " + upgradeClickCost + ")");
+    //     upgradeClickButton.addActionListener(new UpgradeClickListener());
 
-        addAinaButton = new JButton("Add Aina? (Cost: " + ainaCost + ")");
-        addAinaButton.addActionListener(new autoAinaListener());
+    //     upgradeMultiplierButton = new JButton("Upgrade Click Multiplier (Cost: " + upgradeMultiplierCost + ")");
+    //     upgradeMultiplierButton.addActionListener(new MultiplierListener());
 
-        addCoraButton = new JButton("Add Cora? (Cost: " + coraCost + ")");
-        addCoraButton.addActionListener(new autoCoraListener());
+    //     upgradeAutoButton = new JButton("Upgrade Auto Clicker (Cost: " + autoClickerCost + ")");
+    //     upgradeAutoButton.addActionListener(new UpgradeAutoListener());
 
-        return shopPanel;
-    }
+    //     addAinaButton = new JButton("Add Aina? (Cost: " + ainaCost + ")");
+    //     addAinaButton.addActionListener(new AutoAinaListener());
+
+    //     addCoraButton = new JButton("Add Cora? (Cost: " + coraCost + ")");
+    //     addCoraButton.addActionListener(new AutoCoraListener());
+
+    //     partyHatButton = new JButton("Give Ben a Party Hat? (Cost: " + partyHatCost + ")");
+    //     partyHatButton.addActionListener(new PartyHatListener());
+
+
+    //     return shopPanel;
+    // }
 
     public void setTotalClicks(int totalClicks) {
         this.totalClicks = totalClicks;
@@ -149,7 +252,7 @@ public final class ClickerGamePanel2 extends JPanel {
 
     public void setClickValue(int clickValue) {
         this.clickValue = clickValue;
-        upgradeLabel.setText("Click Value: " + clickValue);
+        clickValueLabel.setText("Click Value: " + clickValue);
     }
 
     public void setAutoValue(int autoValue) {
@@ -169,27 +272,24 @@ public final class ClickerGamePanel2 extends JPanel {
     }
 
     public void untilNextLevel() {
-        nextLevelValue = (int) Math.pow(2, level) * 100;
+        nextLevelValue = (int) Math.pow(3, level) * 100;
         int nextLevel = nextLevelValue - totalClicks;
         nextLevelLabel.setText("Next Level: " + nextLevel);
     }
 
     public void checkLevel() {
         if (level % 5 == 0 && !multiplierApplied) {
+            JOptionPane.showMessageDialog(null, "You've reached a milestone! Click Multiplier increased by 1!");
             clickMultiplier++;
             multiplierLabel.setText("Click Multiplier: " + clickMultiplier);
+            clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
             multiplierApplied = true;
         }
-        else if (level % 5 != 0) {
-            multiplierApplied = false;
-        }
         if (level % 10 == 0 && !multiplierApplied) {
+            JOptionPane.showMessageDialog(null, "You've reached a milestone! Auto Clicker increased by 1!");
             autoValue++;
             autoLabel.setText("Auto Clicker: " + autoValue);
             multiplierApplied = true;
-        }
-        else if (level % 10 != 0) {
-            multiplierApplied = false;
         }
     }
 
@@ -228,7 +328,7 @@ public final class ClickerGamePanel2 extends JPanel {
             if (totalClicks >= upgradeClickCost) {
                 setTotalClicks(totalClicks - upgradeClickCost);
                 setClickValue(clickValue + 1);
-                upgradeClickCost += Math.pow(upgradeClickCost, 1.1);
+                upgradeClickCost *= 2;
                 upgradeClickButton.setText("Upgrade Click Value (Cost: " + upgradeClickCost + ")");
             }
         }
@@ -240,13 +340,13 @@ public final class ClickerGamePanel2 extends JPanel {
             if (totalClicks >= upgradeMultiplierCost) {
                 setTotalClicks(totalClicks - upgradeMultiplierCost);
                 setMultiplier(clickMultiplier + 1);
-                upgradeMultiplierCost += Math.pow(upgradeMultiplierCost, 1.2);
+                upgradeMultiplierCost *= 2;
                 upgradeMultiplierButton.setText("Upgrade Click Multiplier (Cost: " + upgradeMultiplierCost + ")");
             }
         }
     }
 
-    private class autoAinaListener implements ActionListener {
+    private class AutoAinaListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (totalClicks >= ainaCost) {
@@ -254,6 +354,7 @@ public final class ClickerGamePanel2 extends JPanel {
                 setTotalClicks(totalClicks - ainaCost);
                 setAutoValue(autoValue + 1);
                 autoLabel.setText("Auto Clicker: " + autoValue);
+                addAinaButton.setVisible(false);
     
                 if (!autoClickerRunning) {
                     startAutoClicker();
@@ -262,7 +363,7 @@ public final class ClickerGamePanel2 extends JPanel {
         }
 
 }
-    private class autoCoraListener implements ActionListener {
+    private class AutoCoraListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (totalClicks >= coraCost) {
@@ -270,11 +371,73 @@ public final class ClickerGamePanel2 extends JPanel {
                 setTotalClicks(totalClicks - coraCost);
                 setAutoValue(autoValue + 5);
                 autoLabel.setText("Auto Clicker: " + autoValue);
+                addCoraButton.setVisible(false);
     
                 if (!autoClickerRunning) {
                     startAutoClicker();
                 }
             }
+        }
+    }
+
+    private class UpgradeAutoListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (totalClicks >= autoClickerCost) {
+                setTotalClicks(totalClicks - autoClickerCost);
+                setAutoValue(autoValue + 1);
+                autoClickerCost *= 2;
+                upgradeAutoButton.setText("Upgrade Auto Clicker (Cost: " + autoClickerCost + ")");
+            }
+        }
+    }
+
+    private class PartyHatListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JOptionPane.showMessageDialog(null, "Ben is now wearing a party hat! +5 Click Value!");
+            partyHatButton.setVisible(false);
+            ImageIcon partyHat = new ImageIcon("images/ben_partyHat.png");
+            Image partyHatImage = partyHat.getImage();
+            Image newPartyHat = partyHatImage.getScaledInstance(400, 200, Image.SCALE_SMOOTH);
+            clickButton.setIcon(new ImageIcon(newPartyHat));
+        }
+    }
+
+    private class InventoryItemListener implements ActionListener {
+        private String item;
+
+        public InventoryItemListener(String item) {
+            this.item = item;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            boolean isEquipped = inventory.get(item);
+            inventory.put(item, !isEquipped);
+            ((JButton) e.getSource()).setText(item + (inventory.get(item) ? " (Equipped)" : " (Unequipped)"));
+            updateEquippedItems();
+        }
+    }
+
+    public void updateEquippedItems() {
+        if (inventory.getOrDefault("Party Hat", false)) {
+            partyHatButton.setVisible(false);
+            JOptionPane.showMessageDialog(null, "Ben is now wearing a party hat! +5 Click Value!");
+            clickValue += 5;
+            clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+            ImageIcon partyHat = new ImageIcon("images/ben_partyHat.png");
+            Image partyHatImage = partyHat.getImage();
+            Image newPartyHat = partyHatImage.getScaledInstance(400, 200, Image.SCALE_SMOOTH);
+            clickButton.setIcon(new ImageIcon(newPartyHat));
+        }
+        else {
+            partyHatButton.setVisible(true);
+            clickValue -= 5;
+            ImageIcon ben = new ImageIcon("images/ben.png");
+            Image benImage = ben.getImage();
+            Image newBen = benImage.getScaledInstance(400, 200, Image.SCALE_SMOOTH);
+            clickButton.setIcon(new ImageIcon(newBen));
         }
     }
 }
