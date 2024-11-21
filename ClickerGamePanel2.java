@@ -41,6 +41,7 @@ public final class ClickerGamePanel2 extends JPanel {
         initializeInventory();
     }
 
+    @SuppressWarnings("Convert2Lambda")
     public void initializeShop() {
         shopPanel.setLayout(new BoxLayout(shopPanel, BoxLayout.Y_AXIS));
         openShopButton = new JButton("Open Shop");
@@ -125,6 +126,7 @@ public final class ClickerGamePanel2 extends JPanel {
                     clickLabel.setText("Total Clicks: " + totalClicks);
                     inventory.put("Party Hat", false);
                     partyHatButton.setEnabled(false);
+                    
                 }
             }
         });
@@ -269,6 +271,7 @@ public final class ClickerGamePanel2 extends JPanel {
         }
     }
 
+    @SuppressWarnings("Convert2Lambda")
     public void startAutoClicker() {
         autoClickerTimer = new Timer(1000, new ActionListener() {
             @Override
@@ -390,7 +393,7 @@ public final class ClickerGamePanel2 extends JPanel {
                         // Unequip the currently equipped item
                         for (Map.Entry<String, Boolean> entry : inventory.entrySet()) {
                             if (entry.getValue()) {
-                                // inventory.put(entry.getKey(), false);
+                                inventory.put(entry.getKey(), false);
                                 // Update the button text
                                 for (int i = 0; i < inventoryPanel.getComponentCount(); i++) {
                                     JButton button = (JButton) inventoryPanel.getComponent(i);
@@ -426,7 +429,7 @@ public final class ClickerGamePanel2 extends JPanel {
         }
     
         switch (equippedItem) {
-            case "Party Hat":
+            case "Party Hat" -> {
                 partyHatButton.setVisible(false);
                 JOptionPane.showMessageDialog(null, "Ben is now wearing a party hat! +5 Click Value!");
                 clickValue += 5;
@@ -434,38 +437,36 @@ public final class ClickerGamePanel2 extends JPanel {
                 ImageIcon partyHat = new ImageIcon("images/ben_partyHat.png");
                 clickButton.setIcon(partyHat);
                 inventory.put("Party Hat", true);
-                break;
-    
-            case "Mouse Ears":
-            mouseEarsButton.setVisible(false);
-            JOptionPane.showMessageDialog(null, "Ben is now wearing mouse ears! +2 Click Value!");
-            clickValue += 2;
-            clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
-            ImageIcon mouseEars = new ImageIcon("images/ben_mouseEars.png");
-            clickButton.setIcon(mouseEars);
-            inventory.put("Mouse Ears", true);
-            break;
-            case null:
-            System.out.println("No item equipped");
-
-            if (inventory.containsKey("Party Hat") && inventory.get("Party Hat")) {
-                partyHatButton.setVisible(true);
-                clickValue -= 5;
-                clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
-                inventory.put("Party Hat", false);
-            } 
-            if (inventory.containsKey("Mouse Ears") && inventory.get("Mouse Ears")) {
-                mouseEarsButton.setVisible(true);
-                clickValue -= 2;
-                clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
-                inventory.put("Mouse Ears", false);
             }
-            break;
-            default:
-            
-            ImageIcon benDefault = new ImageIcon("images/ben.png");
-            clickButton.setIcon(benDefault);
-            break;
+    
+            case "Mouse Ears" -> {
+                mouseEarsButton.setVisible(false);
+                JOptionPane.showMessageDialog(null, "Ben is now wearing mouse ears! +2 Click Value!");
+                clickValue += 2;
+                clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+                ImageIcon mouseEars = new ImageIcon("images/ben_mouseEars.png");
+                clickButton.setIcon(mouseEars);
+                inventory.put("Mouse Ears", true);
+            }
+            case null -> {
+                System.out.println("No item equipped");
+                
+                if (inventory.containsKey("Party Hat")) {
+                    partyHatButton.setVisible(true);
+                    clickValue -= 5;
+                    clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+                    inventory.put("Party Hat", false);
+                } else if (inventory.containsKey("Mouse Ears")) {
+                    mouseEarsButton.setVisible(true);
+                    clickValue -= 2;
+                    clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+                    inventory.put("Mouse Ears", false);
+                }
+            }
+            default -> {
+                ImageIcon benDefault = new ImageIcon("images/ben.png");
+                clickButton.setIcon(benDefault);
+            }
         }
     }
 }
