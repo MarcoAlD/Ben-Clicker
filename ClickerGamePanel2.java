@@ -24,7 +24,7 @@ public final class ClickerGamePanel2 extends JPanel {
     private JLabel autoLabel, clickLabel, levelLabel, nextLevelLabel, multiplierLabel, clickValueLabel;
     private boolean multiplierApplied = false, autoClickerRunning = false;
     private Timer autoClickerTimer;
-    private Map<String, Boolean> inventory, benInventory, coraInventory, ainaInventory;
+    private Map<String, Boolean> benInventory, coraInventory, ainaInventory;
 
     public ClickerGamePanel2() {
         this.setLayout(new BorderLayout(100, 0));
@@ -34,7 +34,6 @@ public final class ClickerGamePanel2 extends JPanel {
         benInventoryPanel = new JPanel();
         coraInventoryPanel = new JPanel();
         ainaInventoryPanel = new JPanel();
-        inventory = new HashMap<>();
         benInventory = new HashMap<>();
         coraInventory = new HashMap<>();
         // ainaInventory = new HashMap<>();
@@ -129,6 +128,7 @@ public final class ClickerGamePanel2 extends JPanel {
                 shopPanel.repaint();
             }
         });
+        openCoraShopButton.setEnabled(false);
 
         closeCoraShopButton = new JButton("Close Cora's Shop");
         closeCoraShopButton.addActionListener(new ActionListener() {
@@ -469,6 +469,7 @@ public final class ClickerGamePanel2 extends JPanel {
                 setAutoValue(autoValue + 5);
                 autoLabel.setText("Auto Clicker: " + autoValue);
                 addCoraButton.setVisible(false);
+                openCoraShopButton.setEnabled(true);
     
                 if (!autoClickerRunning) {
                     startAutoClicker();
@@ -571,7 +572,14 @@ public final class ClickerGamePanel2 extends JPanel {
                 ImageIcon coraPartyHat = new ImageIcon("images/cora_partyHat.png");
                 clickButton.setIcon(coraPartyHat);
                 break;
-
+            case "Cora's Dog Ears":
+                coraDogEarsButton.setVisible(false);
+                JOptionPane.showMessageDialog(null, "Cora is now wearing dog ears! +2 Click Value!");
+                clickValue += 2;
+                clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+                ImageIcon coraDogEars = new ImageIcon("images/cora_dogEars.png");
+                coraButton.setIcon(coraDogEars);
+                break;
             default:
                 for (Map.Entry<String, Boolean> entry : inventory.entrySet()) {
                     if (entry.getKey().equals("Ben's Party Hat") && !entry.getValue()) {
@@ -586,11 +594,56 @@ public final class ClickerGamePanel2 extends JPanel {
                         coraPartyHatButton.setVisible(true);
                         clickValue -= 5;
                         clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
+                    } else if (entry.getKey().equals("Cora's Dog Ears") && !entry.getValue()) {
+                        coraDogEarsButton.setVisible(true);
+                        clickValue -= 2;
+                        clickValueLabel.setText("Click Value: " + clickValue + "(" + clickValue * clickMultiplier + ")");
                     }
                 }
-                ImageIcon ben = new ImageIcon("images/ben.png");
-                clickButton.setIcon(ben);
+                clickButton.setIcon(new ImageIcon("images/ben.png"));
+                coraButton.setIcon(new ImageIcon("images/cora.png"));
                 break;
         }
     }
 }
+
+/*
+ * Exception in thread "AWT-EventQueue-0" java.lang.NullPointerException: Cannot invoke "String.hashCode()" because "equippedItem" is null
+        at ClickerGamePanel2.updateEquippedItems(ClickerGamePanel2.java:548)
+        at ClickerGamePanel2$InventoryItemListener.actionPerformed(ClickerGamePanel2.java:534)
+        at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+        at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+        at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+        at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+        at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+        at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+        at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+        at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+        at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+        at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+        at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+        at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+        at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+        at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+        at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+        at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+        at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+        at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+        at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+        at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+        at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+        at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+        at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+        at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+        at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+        at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+ */
