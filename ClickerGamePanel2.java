@@ -19,7 +19,7 @@ import javax.swing.Timer;
 public final class ClickerGamePanel2 extends JPanel {
 
     private JPanel shopPanel, inventoryPanel, benInventoryPanel, coraInventoryPanel, ainaInventoryPanel;
-    private int totalClicks = 0, coraDogEarsCost = 2000, coraPartyHatCost = 8000, mouseEarsCost = 1000, partyHatCost = 5000, clickValue = 300, clickMultiplier = 1, autoValue = 0, upgradeClickCost = 150, level = 1, nextLevelValue = (int) Math.pow(3, level) * 100, upgradeMultiplierCost = 1500, ainaCost = 3000, coraCost = 12000, autoClickerCost = 3000;
+    private int totalClicks = 0, coraDogEarsCost = 2000, coraPartyHatCost = 8000, mouseEarsCost = 1000, partyHatCost = 5000, clickValue = 12000, clickMultiplier = 1, autoValue = 0, upgradeClickCost = 150, level = 1, nextLevelValue = (int) Math.pow(3, level) * 100, upgradeMultiplierCost = 1500, ainaCost = 3000, coraCost = 12000, autoClickerCost = 3000;
     private JButton openBenInventoryButton, openCoraInventoryButton, openAinaInventoryButton, openBenShopButton, closeBenShopButton, openCoraShopButton, closeCoraShopButton, openAinaShopButton, closeAinaShopButton, clickButton, coraDogEarsButton, coraPartyHatButton, mouseEarsButton, openInventoryButton, closeInventoryButton, upgradeAutoButton, upgradeClickButton, upgradeMultiplierButton, ainaButton, coraButton, openShopButton, closeShopButton, addAinaButton, addCoraButton, partyHatButton;
     private JLabel autoLabel, clickLabel, levelLabel, nextLevelLabel, multiplierLabel, clickValueLabel;
     private boolean multiplierApplied = false, autoClickerRunning = false;
