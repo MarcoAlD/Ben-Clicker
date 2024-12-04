@@ -1,3 +1,9 @@
+/*
+ * This project is a clicker game that has upgrades, auto-clickers, and a prestige system.
+ * @author Marco A Duarte
+ * @version 1.0
+ */
+
 import java.awt.Dimension;
 import javax.swing.JFrame;
 

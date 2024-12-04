@@ -13,18 +13,28 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class BenClickerPanel extends JPanel {
+    // Instance variables
     private JPanel clickPanel;
     private JButton ainaButton, coraButton, benButton, openGeneralShopButton, closeShopButton, openBenShopButton, openCoraShopButton, openAinaShopButton, upgradeBoinValueButton, upgradeAutoValueButton, upgradeBoinMultiplierButton, benPartyHatButton, benGlassesButton, benMouseEarsButton, buyCoraButton, coraPartyHatButton, coraGlassesButton, coraDogEarsButton, buyAinaButton, ainaPartyHatButton, ainaGlassesButton, ainaCatEarsButton, equipBenPartyHatButton, unequipBenPartyHatButton, equipBenGlassesButton, unequipBenGlassesButton, equipBenMouseEarsButton, unequipBenMouseEarsButton, equipCoraPartyHatButton, unequipCoraPartyHatButton, equipCoraGlassesButton, unequipCoraGlassesButton, equipCoraDogEarsButton, unequipCoraDogEarsButton, equipAinaPartyHatButton, unequipAinaPartyHatButton, equipAinaGlassesButton, unequipAinaGlassesButton, equipAinaCatEarsButton, unequipAinaCatEarsButton;
     private JLabel autoValueLabel, nextLevelLabel, boinValueLabel, boinMultiplierLabel, levelLabel, totalBoinsLabel;
-    private int autoValue = 0, totalBoins = 0, boinValue = 1000, boinMultiplier = 1, level = 1, nextLevelValue = (int) Math.pow(3, level) * 1000, upgradeBoinValue = (int) Math.pow(3, boinValue) * 100, upgradeAutoValue = (int) Math.pow(3, autoValue) * 100, upgradeBoinMultiplier = (int) Math.pow(3, boinMultiplier) * 100;
+    private int autoValue = 0, totalBoins = 0, boinValue = 1, boinMultiplier = 1, level = 1, nextLevelValue = (int) Math.pow(3, level) * 1000, upgradeBoinValue = (int) Math.pow(3, boinValue) * 100, upgradeAutoValue = (int) Math.pow(3, autoValue) * 100, upgradeBoinMultiplier = (int) Math.pow(3, boinMultiplier) * 100;
     private boolean multiplierApplied = false, autoClickerRunning = false;
     private Timer autoClickerTimer;
 
+    // Constructor
+
+    @SuppressWarnings("OverridableMethodCallInConstructor")
     public BenClickerPanel() {
         this.setLayout(new BorderLayout());
         this.add(titleScreenPanel(), BorderLayout.CENTER);
     }
 
+    /*
+     * Title screen panel where the user clicks play and the game starts
+     * @return JPanel
+     */
+
+    @SuppressWarnings("Convert2Lambda")
     public JPanel titleScreenPanel() {
         JPanel titleScreenPanel = new JPanel();
         // add a title screen where the user clicks play and the game starts
@@ -57,6 +67,11 @@ public class BenClickerPanel extends JPanel {
         return titleScreenPanel;
 }
 
+/*
+ * Click panel where you can click on Ben to get boins
+ * @return JPanel
+ */
+
 private JPanel createClickPanel() {
     clickPanel = new JPanel();
     clickPanel.setLayout(new BorderLayout());
@@ -73,6 +88,11 @@ private JPanel createClickPanel() {
     
     return clickPanel;
 }
+
+/*
+ * Stats panel to display the level, next level, boin value, boin multiplier, and auto value
+ * @return JPanel
+ */
 
 public JPanel statsPanel() {
     JPanel statsPanel = new JPanel();
@@ -102,6 +122,11 @@ public JPanel statsPanel() {
     return statsPanel;
 }
 
+/*
+ * Total boins panel to display the total amount of boins you have
+ * @return JPanel
+ */
+
 public JPanel totalBoinsPanel() {
     JPanel totalBoinsPanel = new JPanel();
     totalBoinsPanel.setLayout(new FlowLayout());
@@ -111,7 +136,21 @@ public JPanel totalBoinsPanel() {
     return totalBoinsPanel;
 }
 
-public JPanel shopPanel() {
+/*
+ * This is the shop panel where you can buy upgrades, outfits, and more!
+ * The shop panel is split into 4 sections: General Shop, Ben's Shop, Cora's Shop, and Aina's Shop
+ * Each section has its own buttons to buy upgrades and outfits
+ * The general shop has upgrades for boin value, auto value, and boin multiplier
+ * Ben's shop has outfits for Ben
+ * Cora's shop has outfits for Cora
+ * Aina's shop has outfits for Aina
+ * Each outfit gives you a different amount of boins per click
+ * Each outfit can be equipped and unequipped
+ * @return JPanel
+ */
+
+    @SuppressWarnings("Convert2Lambda")
+    public JPanel shopPanel() {
     JPanel shopPanel = new JPanel();
     shopPanel.setLayout(new BoxLayout(shopPanel, BoxLayout.Y_AXIS));
 
@@ -279,6 +318,7 @@ public JPanel shopPanel() {
                 totalBoins -= upgradeBoinMultiplier;
                 boinMultiplier++;
                 upgradeBoinMultiplier = (int) Math.pow(3, boinMultiplier) * 100;
+                upgradeBoinMultiplierButton.setText("Upgrade Boin Multiplier: " + upgradeBoinMultiplier + " Boins");
                 boinMultiplierLabel.setText("Boin Multiplier: " + boinMultiplier);
                 boinValueLabel.setText("Boin Value: " + boinValue + "(" + boinValue * boinMultiplier + ")");
                 totalBoinsLabel.setText("Total Boins: " + totalBoins);
@@ -939,27 +979,52 @@ public JPanel shopPanel() {
     return shopPanel;
 }
 
+/*
+ * This method sets the total boins.
+ * @param totalBoins the total boins
+ */
+
 public void setTotalBoins(int totalBoins) {
     this.totalBoins = totalBoins;
     totalBoinsLabel.setText("Total Boins: " + totalBoins);
 }
+
+/*
+ * This method sets the boin value.
+ * @param boinValue the boin value
+ */
 
 public void setBoinValue(int boinValue) {
     this.boinValue = boinValue;
     boinValueLabel.setText("Boin Value: " + boinValue);
 }
 
+/*
+ * This method sets the boin multiplier.
+ * @param boinMultiplier the boin multiplier
+ */
+
 public void setBoinMultiplier(int boinMultiplier) {
     this.boinMultiplier = boinMultiplier;
     boinMultiplierLabel.setText("Boin Multiplier: " + boinMultiplier);
 }
+
+/*
+ * This method sets the auto value.
+ * @param autoValue the auto value
+ */
 
 public void setAutoValue(int autoValue) {
     this.autoValue = autoValue;
     autoValueLabel.setText("Auto Value: " + autoValue);
 }
 
-public void startAutoClicker() {
+/*
+ * This method starts the auto clicker.
+ */
+
+    @SuppressWarnings("Convert2Lambda")
+    public void startAutoClicker() {
     autoClickerTimer = new Timer(1000, new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -975,17 +1040,29 @@ public void startAutoClicker() {
     autoClickerRunning = true;
 }
 
+/*
+ * This method has the user level up.
+ */
+
 public void levelUp() {
     level++;
     levelLabel.setText("Level: " + level);
     untilNextLevel();
 }
 
+/*
+ * This method calculates the boins until the next level.
+ */
+
 public void untilNextLevel() {
     nextLevelValue = (int) Math.pow(3, level) * 1000;
     int nextLevel = nextLevelValue - totalBoins;
     nextLevelLabel.setText("Until Next Level: " + nextLevel);
 }
+
+/*
+ * This method checks the level.
+ */
 
 public void checkLevel() {
     if (level % 5 == 0 && !multiplierApplied) { 
@@ -1002,6 +1079,11 @@ public void checkLevel() {
         multiplierApplied = true;
     }
 }
+
+/*
+ * This method is the Ben listener and it has the code for the clicker button.
+ * @param e the action event
+ */
 
 private class BenListener implements ActionListener {
     @Override

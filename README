@@ -1,0 +1,45 @@
+# Project X: Project Name
+
+* Author: Marco A Duarte
+* Class: CS121
+* Semester: Fall 2024
+
+## Overview
+
+This is a clicker game that has upgrades, levels, auto-clickers, and more to make a clicker game
+that is fully functionable and fun. The clicker is based off fictional characters, Ben, Aina, and Cora.
+
+## Compiling and Using
+
+To compile this code, you need a IDE like Visual Studio Code that can use Java extensions to run the code. 
+To use this project, it requires a lot of user input since it's a clicker game that needs you to click on all
+sorts of buttons. 
+
+## Discussion
+
+I had few issues until it came to the shop and inventory. The shop would hardly work and the inventory wouldn't
+work like I wanted to. The whole point of the inventory was to allow the user to equip and unequip the items that
+they wanted to equip/unequip. I fixed the inventory by just getting rid of it and making a built in inventory inside 
+the shops. I made a small diagram of how my clicker game was to be laid out and then just starting going in, adding 
+methods and the GUI. I had to research how to make an inventory, that I ended up not using in the end. I kept getting
+nullpointerexception errors because of the amount of empty variables I had that I kept forgetting about. I just had to 
+go through my code mulitiple times to get rid of variables that I didn't need. The only part of the project that I found
+challenging was the auto clickers and the shops. What finally clicked for me in the process of working in this project was
+how to equip and unequip items without using an inventory system. If I could go back to this project, I would definitely
+add more features and make it look more visually appealing. I can definitely apply what I learned in this project to future
+projects since I learned to be more prepared when it comes to big projects.
+
+## Testing
+
+I tested this project by running through every possible user input that a user can do and fixing any issues that occured along the way.
+
+## Extra Credit
+
+No extra credit
+
+## Sources used
+
+[Here is some help creating links](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#links)
+
+----------
+This README template is using Markdown. To preview your README output, you can copy your file contents to a Markdown editor/previewer such as [https://stackedit.io/editor](https://stackedit.io/editor).
